@@ -154,7 +154,7 @@
 大致的流程图如下图所示。
 
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/blob/master/image/train_xgb_up.png" width = "567" height = "321" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_up.png" width = "567" height = "321" alt="train-xgb" align=center />
 </div>
 
 另外，我们使用了ARIMA模型对数据进行了时序建模。PAI平台的ARIMA超好用啊，点赞。
@@ -173,7 +173,12 @@
 但是使用ARIMA的结果是天气或者季节特征无法被利用。
 
 在最后一次的评测中，我们想起了信号处理里面的中值滤波，改掉了模型融合中的LR，直接以4个模型的预测中值作为融合，这样减少了单个异常模型对单家店的影响，为保险起见又加权了ARIMA和LR模型融合结果。
-观察最后结果，考虑到31日为元旦假期，向下乘了尺度系数；14日最低温度又为-2度，向上乘了尺度系数。
+观察最后结果，考虑到31日为元旦假期，对中值及LR两个模型加权前结果乘了尺度系数0.9x；14日最低温度小于-2度，向上乘了尺度系数1.03。然而这次就没这么幸运啦。
+看到天渡发的图(目测黑色是基准数据)，眼泪掉下来...难道是越改越差了嘛...
+
+[结果图](http://aliyuntianchipublic.cn-hangzhou.oss-pub.aliyun-inc.com/public/files/image/1062283679/1500872611605_iGSkQSXahz.jpg)
+
+所以各位，我奉劝一句，别乱乘系数，还是好好模型的为好。
 
 ## 其他脑洞
 还有些其他脑洞线下还来不及做，在这儿记录下。
