@@ -18,7 +18,9 @@
 
 ### 评估指标
 主办方的具体评分公式不完全公开，总得分为相对误差的函数。
+
 <img src="https://work.alibaba-inc.com/aliwork_tfs/g01_alibaba-inc_com/tfscom/TB1vGo4QFXXXXcuaXXXXXXXXXXX.tfsprivate.png" width = "450" height = "50" alt="score" align=center />
+
 ### 结果提交
 这次比赛提交的是所有企业的结果总和。
 
@@ -32,9 +34,7 @@
 现在这样的提交方式总共只需要28~31个条目，给测答案、作弊或者用玄学脑补数据提供了过多的机会。
 以至于[excel大神(~~*真假难辨*~~)](https://tianchi.aliyun.com/competition/new_articleDetail.html?raceId=231602&postsId=2005)轻轻松松秒杀一众模型党。
 
-## 解法介绍
----
-### 外部数据处理
+## 外部数据处理
 
 #### 节假日数据
 感谢[easybots](http://www.easybots.cn/)，我们从其网站上爬取了2014年末至2017年初的节假日及法定假日数据，并在线下做了滑动窗口。代码在[holiday.py](https://github.com/lvniqi/tianchi_power/blob/master/code/holiday.py)中。
@@ -45,6 +45,8 @@
 
 复赛时官方提供天气数据，遂切换至官方数据。数据包含最低、最高温度、天气，天气状况经过脑补的[weather2val变换](https://github.com/lvniqi/tianchi_power/blob/master/code/weather2val_t.csv)后使用。
 
+## 线下解法介绍
+---
 ### 特征工程(线下部分)
 
 #### 数据清洗
@@ -116,14 +118,16 @@
 ```
 
 这样设计的线性回归模型优点是能控制缩放比例(zoom)，使得结果可控。
-### 反思
+### 反思(线下部分)
 **模型融合存在问题，没有划分训练集和验证集，导致无法做交叉验证。虽然单个模型的棵树和层数事先测试过，但是融合之后说不清楚，也没法验证。**
 
+## 线上解法介绍
+---
 ### 特征工程(线上部分)
 #### 数据清洗
 线上的模型仅仅去掉了[最近一周总电量小于100的店家](https://github.com/lvniqi/tianchi_power/blob/master/blob/master/code/get_feature_column_sql.py#L199)，其他清洗放在欠拟合模型中。虽然这个欠拟合模型已经不那么欠拟合了。
 #### 特征选择
-线上部分由于SQL的限制和对阿里PAI平台不太熟悉的原因，进一步简化了特征，去掉了使用onehot线性回归的那些个特征，甚至连onehot都用得极少。
+线上部分由于SQL的限制和对阿里PAI平台不太熟悉的原因，进一步简化了特征，
 
 |特征|解释|
 |:-------------:|:-----:|
@@ -140,4 +144,11 @@
 
 ### 模型设计+模型融合(线上部分)
 
+## 其他脑洞
+还有些其他脑洞线下还来不及做，在这儿记录下。
 
+#### onehot
+onehot特征(如假期等)太过稀疏了，直接拿来用tree based model训练，在节点分裂的时候不一定会被看上。所以可以在下次比赛时试试先过个线性回归试试。
+<div align=center>
+<img src="./image/onehot_lr.png" width = "393" height = "328" alt="onehot-lr" align=center />
+</div>
