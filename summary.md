@@ -76,15 +76,20 @@
 我们还观察了特征重要性，搞了tiny版本的特征，删去了冗余特征，添加了单周统计特征(min、max、std、mean)，这儿不赘言了，有兴趣可见[get_feature_cloumn_tiny](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L605)。
 
 ### 模型设计(线下部分)
-最终版本的线下模型用了1个3层500棵树的xgboost做清洗。
-训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练3个5至6层900至2000棵树的xgboost模型。
+最终版本的线下模型会对31天分开训练，每天使用了六组特征不同的模型，分别是做过log变换和未做过log变换的28天特征、14天特征、以及tiny版本7天特征(共2*3=6)。
+每组模型首先使用了1个3层500棵树的xgboost做清洗。
+而后使用2个种不同比例抽取最优秀的样本作为清洗后训练集，再训练2个5至6层1000至1600棵树的xgboost模型。
+每组模型的训练方式如下所示，所以共计产生了31*(6*3)个xgboost模型。
 
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_down.png" width = "567" height = "321" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_down.png" width = "403" height = "322" alt="train-xgb" align=center />
 </div>
 
 ### 模型融合(线下部分)
-我们的设想是对三个差异较大的模型做融合，简单的平均貌似满足不了要求，最后使用了tensorflow设计了一个线性回归的模型解决。
+模型融合部分我们使用tensorflow设计了一个线性回归的模型(详细可见[tf_percent_model]())。
+``` python
+
+```
 
 **这边模型融合其实是有些问题的，stacking原来是划分数据集的，我们为了尽可能使用数据集并减少计算量，采用的是划分特征的方式。**
 
