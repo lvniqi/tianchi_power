@@ -77,7 +77,7 @@
 我们还观察了特征重要性，搞了tiny版本的特征，删去了冗余特征，添加了单周统计特征(min、max、std、mean)，这儿不赘言了，有兴趣可见[get_feature_cloumn_tiny](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L605)。
 
 ### 模型设计(线下部分)
-最终版本的线下模型会对31天分开训练，每天使用了六组特征不同的模型，分别是做过log变换和未做过log变换的28天特征、14天特征、以及tiny版本7天特征(共2*3=6)。
+最终版本的线下模型会对31天分开训练，每天使用了六组特征不同的模型，分别是做过log变换和未做过log变换的28天特征、7天特征、以及tiny版特征(共2*3=6)。
 每组模型首先使用了1个3层500棵树的xgboost做清洗。
 而后使用2个种不同比例抽取最优秀的样本作为清洗后训练集，再训练2个5至6层1000至1600棵树的xgboost模型。
 每组模型的训练方式如下所示，所以共计产生了31*(6*3)个xgboost模型。
@@ -87,14 +87,37 @@
 </div>
 
 ### 模型融合(线下部分)
-模型融合部分我们使用tensorflow设计了一个线性回归的模型(详细可见[tf_percent_model]())。
+模型融合部分我们使用tensorflow设计了一个线性回归的模型(详细可见类[tf_percent_model](https://github.com/lvniqi/tianchi_power/blob/master/code/train_tensorflow.py#L532))，
+对每个商家单独做模型融合，原因是考虑到不同的店可能适合不同的模型。
 ``` python
-
+    def __init__(self,day,learning_rate = 1e-2):
+        self.graph = tf.Graph()
+        with self.graph.as_default():
+            self.x_predict = tf.placeholder("float", [None,_feature_length])
+            self.y_ = tf.placeholder("float", [None,1])
+            #layer fc 1
+            w_1 = tf.get_variable('all/w_1', [_feature_length,],
+                                      initializer=tf.random_normal_initializer())
+            #zoom layer
+            w_zoom = tf.get_variable('all/w_zoom', [1,],
+                                      initializer=tf.random_normal_initializer())
+            #0.8~1.2
+            self.zoom = tf.nn.sigmoid(w_zoom)*0.4+0.8
+            self.percent = tf.nn.softmax(w_1)*self.zoom
+            self.y_p = tf.reduce_sum(self.x_predict*self.percent,1)
+            self.y_p = tf.reshape(self.y_p,[-1,1])
+            self.error_rate = tf.reduce_mean(tf.abs(self.y_-self.y_p)/self.y_)
+            self.mse = tf.reduce_mean(tf.abs(self.y_-self.y_p))
+            #self.mse = self.error_rate
+            self.optimizer = tf.train.AdamOptimizer(learning_rate)
+            self.train_step = self.optimizer.minimize(self.mse)
+            self.sess = tf.Session(graph = self.graph)
+            self.sess.run(tf.global_variables_initializer())
 ```
 
-**这边模型融合其实是有些问题的，stacking原来是划分数据集的，我们为了尽可能使用数据集并减少计算量，采用的是划分特征的方式。**
-
-**另一方面，我们所有的模型都没有做交叉验证！！！是的，我们的做法非常不靠谱，千万不要学。没有交叉验证意味着我们这么做有极大的可能会过拟合，当然单个模型的棵树和层数事先测试过，但是这个LR显然是不准的....**
+这样设计的线性回归模型优点是能控制缩放比例(zoom)，使得结果可控。
+### 反思
+**模型融合存在问题，没有划分训练集和验证集，导致无法做交叉验证。虽然单个模型的棵树和层数事先测试过，但是融合之后说不清楚，也没法验证。**
 
 ### 特征工程(线上部分)
 #### 数据清洗
