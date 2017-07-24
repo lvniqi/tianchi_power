@@ -57,6 +57,7 @@
 
 在线下比赛中，我们尝试使用了各种各样奇奇怪怪的特征，如下所示。
 生成代码可见[get_feature_cloumn](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L560)。
+
 |特征|解释|
 |:-------------:|:-----:|
 |user_type#n|对店家使用DBSCAN进行分类后进行onehot编码|
