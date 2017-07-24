@@ -123,11 +123,13 @@
 
 ## 线上解法介绍
 ---
+
 ### 特征工程(线上部分)
 #### 数据清洗
 线上的模型仅仅去掉了[最近一周总电量小于100的店家](https://github.com/lvniqi/tianchi_power/blob/master/blob/master/code/get_feature_column_sql.py#L199)，其他清洗放在欠拟合模型中。虽然这个欠拟合模型已经不那么欠拟合了。
 #### 特征选择
-线上部分由于SQL的限制和对阿里PAI平台不太熟悉的原因，进一步简化了特征，
+线上部分由于SQL的限制和对阿里PAI平台不太熟悉的原因，我们实在无力像线下那样暴力做特征了，所以只能进一步简化特征。
+最终版本的特征是在线下的tiny版本的基础上做完的，参考了线上GBDT的特征重要性，去掉了facebook prophet特征，加入了星期几以及月份数特征。这些特征也没有做one-hot编码，因为考虑到做one-hot编码过于稀疏。
 
 |特征|解释|
 |:-------------:|:-----:|
@@ -142,7 +144,21 @@
 |dayofweek|周几|
 |monthofyear|月份|
 
-### 模型设计+模型融合(线上部分)
+### 模型设计(线上部分)
+由于我们没有发现PAI平台能在IDE上敲建模命令这个隐藏功能，所以只能大幅压缩模型。
+最终版本的线上模型用了1个3层500棵树的PS-SMART做清洗，而后
+训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练3个5至6层900至2000棵树的xgboost模型。
+为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约(2/3)原始特征(类似随机森林中特征提取)(见[split_features](https://github.com/lvniqi/tianchi_power/blob/master/blob/master/code/preprocess.py#L790))。
+大致的流程图如下图所示。
+
+<div align=center>
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/blob/master/image/train_xgb_up.png" width = "567" height = "321" alt="train-xgb" align=center />
+</div>
+
+
+### 模型融合(线上部分)
+
+### 手动调整(线上部分)
 
 ## 其他脑洞
 还有些其他脑洞线下还来不及做，在这儿记录下。
