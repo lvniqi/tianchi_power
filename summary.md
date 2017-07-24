@@ -53,7 +53,7 @@
 首先，去掉了前14天均值小于50的商店，因为这些店对于最终预测结果没什么太大影响(见[filter_empty_user](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L493))。
 
 而后强制去掉了春节那部分的数据[filter_spring_festval](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L515)。因为比较懒，一开始没想到做这个步骤，所以这个是在特征做完，训练之前做的。
-#### 特征选择
+#### 特征提取
 
 在线下比赛中，我们尝试使用了各种各样奇奇怪怪的特征，如下所示。生成代码可见[get_feature_cloumn](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L560)
 
@@ -69,27 +69,18 @@
 |festday#n|以当天为center，窗口大小为5的法定假日数据|
 |power#n|前第n天的电量值，包含前28天数据|
 
-onehot做线性回归的大致流程如下图所示。
-这么做的原因是onehot特征太稀疏了，直接拿来用tree based model训练，在节点分裂的时候不一定会被看上。
-话虽如此，这个做法在实际比赛中貌似作用不大的样子。
-
-<div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/onehot_lr.png" width = "393" height = "328" alt="onehot-lr" align=center />
-</div>
+其中，Prophet要强力推荐下，一个facebook提出的智能化预测工具，能自动检测趋势变化，按年周期组件使用傅里叶级数建模，一个按周的周期组件，使用虚拟变量建模。线下的版本中使用了Prophet的yearly和trend特征，虽然有可能过拟合的问题，但是这种玄学实在是诱人。
 
 ### 模型设计(线下部分)
 最终版本的线下模型用了1个3层500棵树的xgboost做清洗。
 训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练3个5至6层900至2000棵树的xgboost模型。
-为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约(2/3)原始特征(类似随机森林中特征提取)(见[split_features](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L790))。
-大致的流程图如下图所示。
 
 <div align=center>
 <img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb.png" width = "567" height = "321" alt="train-xgb" align=center />
 </div>
 
 ### 模型融合(线下部分)
-我们的设想是对三个差异较大的模型做融合，简单的平均貌似满足不了要求。
-第一次的尝试是用tensorflow设计个线性回归的模型，优点是可以为各个模型的比例设置一定的限制，但是考虑到将来线上没法部署，最后直接换成了LR。
+我们的设想是对三个差异较大的模型做融合，简单的平均貌似满足不了要求，最后使用了tensorflow设计了一个线性回归的模型解决。
 
 **这边模型融合其实是有些问题的，stacking原来是划分数据集的，我们为了尽可能使用数据集并减少计算量，采用的是划分特征的方式。**
 
