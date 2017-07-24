@@ -8,7 +8,7 @@
 ### 赛题背景
 此次比赛赛题为企业用电需求预测。主办方提供扬中市高新区1000多家企业的脱敏历史用电量数据，要求参赛者通过模型算法精准预测该地区下一个月的每日总用电量。
 ### 赛题数据
-主办方提供的数据非常简洁~~*少*~~，只有日期、企业id及用电量数据。
+主办方提供的数据非常简洁(~~*少*~~)，只有日期、企业id及用电量数据。
 
 |record_date|user_id|power_consumption|
 |:-------------:|:-------------:|:-----:|
@@ -30,7 +30,7 @@
 
 说实话我对这样的安排非常的不解，为什么不对每家企业分开提交预测结果呢?
 现在这样的提交方式总共只需要28~31个条目，给测答案、作弊或者用玄学脑补数据提供了过多的机会。
-以至于[excel大神~~*真假难辨*~~](https://tianchi.aliyun.com/competition/new_articleDetail.html?raceId=231602&postsId=2005)轻轻松松秒杀一众模型党。
+以至于[excel大神(~~*真假难辨*~~)](https://tianchi.aliyun.com/competition/new_articleDetail.html?raceId=231602&postsId=2005)轻轻松松秒杀一众模型党。
 
 ## 解法介绍
 ---
@@ -55,8 +55,8 @@
 而后强制去掉了春节那部分的数据[filter_spring_festval](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L515)。因为比较懒，一开始没想到做这个步骤，所以这个是在特征做完，训练之前做的。
 #### 特征提取
 
-在线下比赛中，我们尝试使用了各种各样奇奇怪怪的特征，如下所示。生成代码可见[get_feature_cloumn](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L560)
-
+在线下比赛中，我们尝试使用了各种各样奇奇怪怪的特征，如下所示。
+生成代码可见[get_feature_cloumn](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L560)。
 |特征|解释|
 |:-------------:|:-----:|
 |user_type#n|对店家使用DBSCAN进行分类后进行onehot编码|
@@ -69,14 +69,18 @@
 |festday#n|以当天为center，窗口大小为5的法定假日数据|
 |power#n|前第n天的电量值，包含前28天数据|
 
-其中，Prophet要强力推荐下，一个facebook提出的智能化预测工具，能自动检测趋势变化，按年周期组件使用傅里叶级数建模，一个按周的周期组件，使用虚拟变量建模。线下的版本中使用了Prophet的yearly和trend特征，虽然有可能过拟合的问题，但是这种玄学实在是诱人。
+其中，[Prophet](https://github.com/facebookincubator/prophet)要强力推荐下，一个facebook提出的智能化预测工具，能自动检测趋势变化，按年周期组件使用傅里叶级数建模，按周的周期组件使用虚拟变量建模。线下版本的特征提取中使用了Prophet的yearly和trend特征，虽然有可能过拟合的问题，但是这种玄学实在是诱人。
+
+此外，对于一部分模型使用的特征，我们对power和预测值进行了log变换，以减小数据的变化范围。
+
+我们还观察了特征重要性，搞了tiny版本的特征，删去了冗余特征，添加了单周统计特征(min、max、std、mean)，这儿不赘言了，有兴趣可见[get_feature_cloumn_tiny](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L605)。
 
 ### 模型设计(线下部分)
 最终版本的线下模型用了1个3层500棵树的xgboost做清洗。
 训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练3个5至6层900至2000棵树的xgboost模型。
 
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb.png" width = "567" height = "321" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_down.png.png" width = "567" height = "321" alt="train-xgb" align=center />
 </div>
 
 ### 模型融合(线下部分)
