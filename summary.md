@@ -1,0 +1,125 @@
+电量预测AI大赛 总结
+====
+![title](https://work.alibaba-inc.com/aliwork_tfs/g01_alibaba-inc_com/tfscom/TB1oAMfQFXXXXX1XVXXXXXXXXXX.tfsprivate.jpg)
+
+## 赛题
+
+---
+### 赛题背景
+此次比赛赛题为企业用电需求预测。主办方提供扬中市高新区1000多家企业的脱敏历史用电量数据，要求参赛者通过模型算法精准预测该地区下一个月的每日总用电量。
+### 赛题数据
+主办方提供的数据非常简洁(~~*少*~~)，只有日期、企业id及用电量数据。
+
+|record_date|user_id|power_consumption|
+|:-------------:|:-------------:|:-----:|
+| 20150101     |    1          |   1031|
+| ...          | ...           |...    |
+| 20161130     |1454           |100000 |
+
+### 评估指标
+主办方的具体评分公式不完全公开，总得分为相对误差的函数。
+<img src="https://work.alibaba-inc.com/aliwork_tfs/g01_alibaba-inc_com/tfscom/TB1vGo4QFXXXXcuaXXXXXXXXXXX.tfsprivate.png" width = "450" height = "50" alt="score" align=center />
+### 结果提交
+这次比赛提交的是所有企业的结果总和。
+
+|predict_date|power_consumption|
+|:-------------:|:-----:|
+| 2016/12/1     |10310000|
+| ...          | ...    |
+| 201612/31     |10000000 |
+
+说实话我对这样的安排非常的不解，为什么不对每家企业分开提交预测结果呢?
+现在这样的提交方式总共只需要28~31个条目，给测答案、作弊或者用玄学脑补数据提供了过多的机会。
+以至于[excel大神(~~*真假难辨*~~)](https://tianchi.aliyun.com/competition/new_articleDetail.html?raceId=231602&postsId=2005)轻轻松松秒杀一众模型党。
+
+## 解法介绍
+---
+### 外部数据处理
+
+#### 节假日数据
+感谢[easybots](http://www.easybots.cn/)，我们从其网站上爬取了2014年末至2017年初的节假日及法定假日数据，并在线下做了滑动窗口。代码在[holiday.py](./code/holiday.py)中。
+
+#### 天气数据
+初赛时使用的是[wunderground](http://www.wunderground.com/)提供的南京禄口国际机场每小时气温及湿度数据，以方便计算人体舒适度。
+天气状况使用[weather](http://www.weather.com.cn/)，对坏天气进行特别标记后使用。
+
+复赛时官方提供天气数据，遂切换至官方数据。数据包含最低、最高温度、天气，天气状况经过脑补的[weather2val变换](./code/weather2val_t.csv)后使用。
+
+### 特征工程(线下部分)
+
+#### 数据清洗
+我们把数据清洗一部分放在模型训练之前，一部分放在欠拟合模型中(稍后介绍)。
+
+首先，去掉了前28天最大值小于100的商店，因为这些店对于最终预测结果没什么太大影响(见[filter_empty_user](./code/preprocess.py#L559))。
+
+而后强制去掉了春节那部分的数据[filter_spring_festval](./code/preprocess.py#L581)。因为比较懒，一开始没想到做这个步骤，所以这个是在特征做完，训练之前做的。
+#### 特征选择
+
+本次比赛我们尝试使用了各种各样奇奇怪怪的特征，最多的版本[get_feature_cloumn](./code/preprocess.py#L633)包含近200个特征。
+通过查看xgboost中的特征重要性，我们删除了部分特征。同时加入了一些线性回归结果和统计数据，以降低计算压力，详见[get_feature_cloumn_tiny](./code/preprocess.py#L679)。
+
+大致总结下，有以下这些特征
+
+|特征|解释|
+|:-------------:|:-----:|
+|dayofweek_type#n|周几的onehot编码|
+|user_type#n|对店家前28天的平均电量取对数后进行onehot编码|
+|temp#n|以当天为center，窗口大小为5的温度数据|
+|mean7_power#n|以n天前为start的一周电量均值|
+|max7_power#n|以n天前为start的一周电量最大值|
+|min7_power#n|以n天前为start的一周电量最小值|
+|std7_power#n|以n天前为start的一周电量标准差|
+|holiday_y_p|以onehot后的假期和法定假期对每家店做线性回归后的预测值|
+|dayofweek_y_p|以onehot后的dayofweek_type对每家店做线性回归后的预测值|
+|dayofmonth_y_p|以onehot后的上中下旬及天气对每家店做线性回归后的预测值|
+|temp_y_p|将温度离散化进行onehot编码，而后对每家店做线性回归后的预测值|
+|power#n|前第n天的电量值，包含前7天数据及预测当天前四周相关日期电量值|
+
+onehot做线性回归的大致流程如下图所示。
+这么做的原因是onehot特征太稀疏了，直接拿来用tree based model训练，在节点分裂的时候不一定会被看上。
+话虽如此，这个做法在实际比赛中貌似作用不大的样子。
+
+<div align=center>
+<img src="./image/onehot_lr.png" width = "393" height = "328" alt="onehot-lr" align=center />
+</div>
+
+### 模型设计(线下部分)
+最终版本的线下模型用了1个3层500棵树的xgboost做清洗。
+训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练3个5至6层900至2000棵树的xgboost模型。
+为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约(2/3)原始特征(类似随机森林中特征提取)(见[split_features](./code/preprocess.py#L790))。
+大致的流程图如下图所示。
+
+<div align=center>
+<img src="./image/train_xgb.png" width = "567" height = "321" alt="train-xgb" align=center />
+</div>
+
+### 模型融合(线下部分)
+我们的设想是对三个差异较大的模型做融合，简单的平均貌似满足不了要求。
+第一次的尝试是用tensorflow设计个线性回归的模型，优点是可以为各个模型的比例设置一定的限制，但是考虑到将来线上没法部署，最后直接换成了LR。
+
+**这边模型融合其实是有些问题的，stacking原来是划分数据集的，我们为了尽可能使用数据集并减少计算量，采用的是划分特征的方式。**
+
+**另一方面，我们所有的模型都没有做交叉验证！！！是的，我们的做法非常不靠谱，千万不要学。没有交叉验证意味着我们这么做有极大的可能会过拟合，当然单个模型的棵树和层数事先测试过，但是这个LR显然是不准的....**
+
+### 特征工程(线上部分)
+#### 数据清洗
+线上的模型仅仅去掉了[最近一周总电量小于100的店家](https://github.com/lvniqi/tianchi_power/blob/master/code/get_feature_column_sql.py#L199)，其他清洗放在欠拟合模型中。虽然这个欠拟合模型已经不那么欠拟合了。
+#### 特征选择
+线上部分由于SQL的限制和对阿里PAI平台不太熟悉的原因，进一步简化了特征，去掉了使用onehot线性回归的那些个特征，甚至连onehot都用得极少。
+
+|特征|解释|
+|:-------------:|:-----:|
+|temperature_low_n|n天前最低温度|
+|temperature_high_n|n天前最高温度|
+|weather_val_n|n天前天气值|
+|power_n|前第n天的电量值，包含前7天数据及预测当天前四周相关日期电量值|
+|mean7_power_n|以n天前为start的一周电量均值|
+|max7_power_n|以n天前为start的一周电量最大值|
+|min7_power_n|以n天前为start的一周电量最小值|
+|std7_power_n|以n天前为start的一周电量标准差|
+|dayofweek|周几|
+|monthofyear|月份|
+
+### 模型设计+模型融合(线上部分)
+
+
