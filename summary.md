@@ -77,10 +77,10 @@
 我们还观察了特征重要性，搞了tiny版本的特征，删去了冗余特征，添加了单周统计特征(min、max、std、mean)，这儿不赘言了，有兴趣可见[get_feature_cloumn_tiny](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L605)。
 
 ### 模型设计(线下部分)
-最终版本的线下模型会对31天分开训练，每天使用了六组特征不同的模型，分别是做过log变换和未做过log变换的28天特征、7天特征、以及tiny版特征(共2*3=6)。
+最终版本的线下模型会对31天分开训练，每天使用了六组特征不同的模型，分别是做过log变换和未做过log变换的28天特征、7天特征、以及tiny版特征(共2\*3=6)。
 每组模型首先使用了1个3层500棵树的xgboost做清洗。
 而后使用2个种不同比例抽取最优秀的样本作为清洗后训练集，再训练2个5至6层1000至1600棵树的xgboost模型。
-每组模型的训练方式如下所示，所以共计产生了31*(6*3)个xgboost模型。
+每组模型的训练方式如下所示，所以共计产生了31\*(6\*3)个xgboost模型。
 
 <div align=center>
 <img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_down.png" width = "403" height = "322" alt="train-xgb" align=center />
