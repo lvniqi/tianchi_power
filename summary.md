@@ -80,7 +80,7 @@
 训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练3个5至6层900至2000棵树的xgboost模型。
 
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_down.png.png" width = "567" height = "321" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_down.png" width = "567" height = "321" alt="train-xgb" align=center />
 </div>
 
 ### 模型融合(线下部分)
