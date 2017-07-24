@@ -150,7 +150,7 @@
 由于我们没有发现PAI平台能在IDE上敲建模命令这个隐藏功能，所以只能大幅压缩模型。
 最终版本的线上模型用了1个4层1000棵树的PS-SMART做清洗，而后
 训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练1个5层1000棵树的PS-SMART+2个6层1000棵树的GBDT。
-为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约(2/3)原始特征(类似随机森林中特征提取)(见[split_features](https://github.com/lvniqi/tianchi_power/blob/master/blob/master/code/preprocess.py#L790))。
+为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约2/3数量的原始特征(类似随机森林中特征提取)(见[split_features](https://github.com/lvniqi/tianchi_power/blob/master/blob/master/code/preprocess.py#L790))。
 大致的流程图如下图所示。
 
 <div align=center>
