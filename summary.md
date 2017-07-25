@@ -152,7 +152,7 @@
 线上部分的模型设计和模型融合是在一起做的。首先贴上整个实验图。
 
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/%E6%A8%A1%E5%9E%8B%E5%9B%BE.PNG" width = "567" height = "321" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/%E6%A8%A1%E5%9E%8B%E5%9B%BE.PNG" width = "496" height = "510" alt="train-xgb" align=center />
 </div>
 
 首先将数据集划分10%作为测试集，作为线性回归模型融合的数据来源。剩下90%作为GBDT及PS-SMART训练使用。
@@ -162,9 +162,11 @@
 为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约2/3数量的原始特征(类似随机森林中特征提取)(见[split_features](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L790))。
 大致的流程图如下图所示。
 
-<div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_up.png",alt="train-xgb" align=center />
 </div>
+<div align=center>
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_up.png" width = "567" height = "321" alt="train-xgb" align=center />
+</div>
+
 
 另外，由于考虑到11月以及12月的节假日较少，用电量相对比较平稳(通过观察15年11,12月电量)，比较适合使用时间序列模型进行建模。我们使用了ARIMA模型对数据进行了时序建模。PAI平台的ARIMA超好用啊，点赞。
 
