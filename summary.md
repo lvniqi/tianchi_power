@@ -163,7 +163,7 @@
 大致的流程图如下图所示。
 
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_up.png" width = "496" height = "510" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_up.png",alt="train-xgb" align=center />
 </div>
 
 另外，由于考虑到11月以及12月的节假日较少，用电量相对比较平稳(通过观察15年11,12月电量)，比较适合使用时间序列模型进行建模。我们使用了ARIMA模型对数据进行了时序建模。PAI平台的ARIMA超好用啊，点赞。
