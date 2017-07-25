@@ -147,19 +147,24 @@
 |dayofweek|周几|
 |monthofyear|月份|
 
-### 模型设计(线上部分)
+### 模型设计及模型融合(线上部分)
+
+线上部分的模型设计和模型融合是在一起做的。首先贴上整个实验图。
+<div align=center>
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/模型图.png" width = "567" height = "321" alt="train-xgb" align=center />
+</div>
+
 由于我们没有发现PAI平台能在IDE上敲建模命令这个隐藏功能，所以只能大幅压缩模型。
 最终版本的线上模型用了1个4层1000棵树的PS-SMART做清洗，而后训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练1个5层1000棵树的PS-SMART+2个6层1000棵树的GBDT。
 为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约2/3数量的原始特征(类似随机森林中特征提取)(见[split_features](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L790))。
 大致的流程图如下图所示。
 
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_up.png" width = "567" height = "321" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/train_xgb_up.png" width = "496" height = "510" alt="train-xgb" align=center />
 </div>
 
 另外，由于考虑到11月以及12月的节假日较少，用电量相对比较平稳(通过观察15年11,12月电量)，比较适合使用时间序列模型进行建模。我们使用了ARIMA模型对数据进行了时序建模。PAI平台的ARIMA超好用啊，点赞。
 
-### 模型融合(线上部分)
 
 ## 关于人工调整
 除了上述模型训练结果，我们还对模型训练结果进行过手动的微调。
@@ -188,7 +193,7 @@
 onehot特征(如假期等)太过稀疏了，直接拿来用tree based model训练，在节点分裂的时候不一定会被看上。所以可以在下次比赛时试试先过个线性回归试试。
 
 <div align=center>
-<img src="./image/onehot_lr.png" width = "393" height = "328" alt="onehot-lr" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/onehot_lr.png" width = "393" height = "328" alt="onehot-lr" align=center />
 </div>
 
 #### Other
