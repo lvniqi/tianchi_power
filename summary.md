@@ -193,12 +193,18 @@ SELECT '1'
 FROM gbdt_predict_day_1
 GROUP BY day_num;
 ```
-使用模型预测结果对取中值和LR回归作比较，如下图所示。
+使用模型预测结果对取中值和LR回归以SAE为代价作比较，如下图所示。
 
 </div>
 <div align=center>
 <img src="https://github.com/lvniqi/tianchi_power/blob/master/image/median_lr.png" alt="median-lr" align=center />
 </div>
+
+可见取中值基本上比线性回归要稍好一些，
+而且还不考虑这个是没有做交叉验证的，
+在真实情况下取中值效果相比较而言肯定会更优秀一点。
+
+所以最后一天提交结果基本上用了中值结果，但考虑到保险起见，毕竟只有最后一次机会了，仍然加权了ARIMA及线性回归融合模型结果，现在看来不加权可能会更好一点。
 
 ## 关于人工调整
 除了上述模型训练结果，我们还对模型训练结果进行过手动的微调。
