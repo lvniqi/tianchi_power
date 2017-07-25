@@ -180,10 +180,19 @@
 第一种方式即是之前展示的那样，使用线性回归融合PS-SMART及GBDT预测结果。
 而后再将线性回归结果与ARIMA加权得到最终结果。
 ##### 模型预测取中值
+最后一天提交时，
 考虑到线上的线性回归无法对每家店单独操作，
 我们索性直接将PS-SMART及GBDT所得到的4个预测结果取中值，
-以期为每个店自动选择合适的模型进行预测。
-
+以期为每个店自动选择合适的模型进行预测，
+并剔除不合适的异常模型对结果造成的影响。
+SQL代码是这样的:
+```sql
+INSERT INTO TABLE tianchi_power_answer_gbdt_avg
+SELECT '1'
+	, SUM((ordinal(2, prediction_result_1, prediction_result_2, prediction_result_3, prediction_result_4) + ordinal(3, prediction_result_1, prediction_result_2, prediction_result_3, prediction_result_4)) / 2)
+FROM gbdt_predict_day_1
+GROUP BY day_num;
+```
 
 ## 关于人工调整
 除了上述模型训练结果，我们还对模型训练结果进行过手动的微调。
