@@ -128,7 +128,7 @@
 
 ### 特征工程(线上部分)
 #### 数据清洗
-线上的模型仅仅去掉了[最近一周总电量小于100的店家](https://github.com/lvniqi/tianchi_power/blob/master/blob/master/code/get_feature_column_sql.py#L199)，其他清洗放在欠拟合模型中。虽然这个欠拟合模型已经不那么欠拟合了。
+线上的模型仅仅去掉了[最近一周总电量小于100的店家](https://github.com/lvniqi/tianchi_power/blob/master/code/get_feature_column_sql.py#L199)，其他清洗放在欠拟合模型中。虽然这个欠拟合模型已经不那么欠拟合了。
 对于1416以及1414这两家店使用预测值进行了异常值填补(因为这两家店在11月底的时候停产了,由于我们做了滑窗，去除这两个异常值意味着去除一整个11月的训练数据)。
 #### 特征选择
 线上部分由于SQL的限制和对阿里PAI平台不太熟悉的原因，我们实在无力像线下那样暴力做特征了，所以只能进一步简化特征。
@@ -150,7 +150,7 @@
 ### 模型设计(线上部分)
 由于我们没有发现PAI平台能在IDE上敲建模命令这个隐藏功能，所以只能大幅压缩模型。
 最终版本的线上模型用了1个4层1000棵树的PS-SMART做清洗，而后训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练1个5层1000棵树的PS-SMART+2个6层1000棵树的GBDT。
-为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约2/3数量的原始特征(类似随机森林中特征提取)(见[split_features](https://github.com/lvniqi/tianchi_power/blob/master/blob/master/code/preprocess.py#L790))。
+为了加大各个模型间的差异，我们将特征进行采样，使每个模型得到大约2/3数量的原始特征(类似随机森林中特征提取)(见[split_features](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L790))。
 大致的流程图如下图所示。
 
 <div align=center>
