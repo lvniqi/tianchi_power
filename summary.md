@@ -151,7 +151,7 @@
 
 线上部分的模型设计和模型融合是在一起做的。首先贴上整个实验图。
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/模型图.png" width = "567" height = "321" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/%E6%A8%A1%E5%9E%8B%E5%9B%BE.PNG" width = "567" height = "321" alt="train-xgb" align=center />
 </div>
 
 由于我们没有发现PAI平台能在IDE上敲建模命令这个隐藏功能，所以只能大幅压缩模型。
