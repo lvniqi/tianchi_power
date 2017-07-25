@@ -152,7 +152,7 @@
 线上部分的模型设计和模型融合是在一起做的。首先贴上整个实验图。
 
 <div align=center>
-<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/%E6%A8%A1%E5%9E%8B%E5%9B%BE.PNG" width = "496" height = "510" alt="train-xgb" align=center />
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/%E6%A8%A1%E5%9E%8B%E5%9B%BE.PNG" width = "496" height = "510" alt="test" align=center />
 </div>
 
 首先将数据集划分10%作为测试集，作为线性回归模型融合的数据来源。剩下90%作为GBDT及PS-SMART训练使用。
@@ -193,6 +193,12 @@ SELECT '1'
 FROM gbdt_predict_day_1
 GROUP BY day_num;
 ```
+使用模型预测结果对取中值和LR回归作比较，如下图所示。
+
+</div>
+<div align=center>
+<img src="https://github.com/lvniqi/tianchi_power/blob/master/image/median_lr.png" alt="median-lr" align=center />
+</div>
 
 ## 关于人工调整
 除了上述模型训练结果，我们还对模型训练结果进行过手动的微调。
