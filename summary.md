@@ -74,7 +74,9 @@
 
 其中，[Prophet](https://github.com/facebookincubator/prophet)要强力推荐下，一个facebook提出的智能化预测工具，能自动检测趋势变化，按年周期组件使用傅里叶级数建模，按周的周期组件使用虚拟变量建模。线下版本的特征提取中使用了Prophet的yearly和trend特征，虽然有可能过拟合的问题，但是这种玄学实在是诱人。
 
-此外，对于一部分模型使用的特征，我们对power和预测值进行了log变换，以减小数据的变化范围。
+此外，对于一部分模型使用的特征，我们对power和预测值进行了log变换。
+进行log变换后可以使不同耗电量的店家保持为同一数量级，可以增加耗电较少的商户的预测精度，非log变换的则更有利于预测耗电大户趋势。
+
 
 我们还观察了特征重要性，搞了tiny版本的特征，删去了冗余特征，添加了单周统计特征(min、max、std、mean)，这儿不赘言了，有兴趣可见[get_feature_cloumn_tiny](https://github.com/lvniqi/tianchi_power/blob/master/code/preprocess.py#L605)。
 
