@@ -255,6 +255,3 @@ onehot编码特征(如假期等)太过稀疏了，直接拿来用tree based mode
 <img src="https://github.com/lvniqi/tianchi_power/blob/master/image/onehot_lr.png" width = "393" height = "328" alt="onehot-lr" align=center />
 </div>
 
-#### Other
-由于我们分别对31天划分了31个模型，并且31个模型的预测情况都不太一样，最后对模型修正的时候是对整体修正的，应该使用其他方法对每个模型都单独修正。
-
