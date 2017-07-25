@@ -65,9 +65,9 @@
 |user_type#n|对店家使用DBSCAN进行分类后进行onehot编码|
 |trend#n|以当天为center，窗口大小为5的趋势数据，使用prophet获得|
 |yearly#n|以当天为center，窗口大小为5的年趋势数据，使用prophet获得|
-|temp#n|以当天为center，窗口大小为5的温度数据|
-|bad_weather#n|以当天为center，窗口大小为5的坏天气数据|
-|ssd#n|以当天为center，窗口大小为5的人体舒适度数据|
+|temp#n|温度数据|
+|bad_weather#n|坏天气数据|
+|ssd#n|人体舒适度数据|
 |holiday#n|以当天为center，窗口大小为5的周末假日数据|
 |festday#n|以当天为center，窗口大小为5的法定假日数据|
 |power#n|前第n天的电量值，包含前28天数据|
