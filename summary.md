@@ -94,8 +94,10 @@
 </div>
 
 ### 模型融合(线下部分)
-模型融合部分我们使用tensorflow设计了一个线性回归的模型(详细可见类[tf_percent_model](https://github.com/lvniqi/tianchi_power/blob/master/code/train_tensorflow.py#L532))，
-对每个商家单独做模型融合。原因是考虑到不同的店可能适合不同的模型，而且600+个条目应该足够线性回归训练了，另外使用xgboost的线性回归模型能控制结果缩放比例(zoom)，使得结果可控。
+模型融合部分我们使用tensorflow设计了一个线性回归的模型(详细可见类[tf_percent_model](https://github.com/lvniqi/tianchi_power/blob/master/code/train_tensorflow.py#L532))，求取各个模型权重。
+考虑到商家可能适合不同的模型，我们对每个店单独求取权重。
+从2015年至2016年9月共计有500+的样本，应该足够线性回归训练了，
+另外使用tensorflow的线性回归模型能控制结果缩放比例(zoom)，使得结果可控。
 ``` python
     def __init__(self,day,learning_rate = 1e-2):
         self.graph = tf.Graph()
