@@ -150,9 +150,12 @@
 ### 模型设计及模型融合(线上部分)
 
 线上部分的模型设计和模型融合是在一起做的。首先贴上整个实验图。
+
 <div align=center>
 <img src="https://github.com/lvniqi/tianchi_power/blob/master/image/%E6%A8%A1%E5%9E%8B%E5%9B%BE.PNG" width = "567" height = "321" alt="train-xgb" align=center />
 </div>
+
+首先将数据集划分10%作为测试集，作为线性回归模型融合的数据来源。剩下90%作为GBDT及PS-SMART训练使用。
 
 由于我们没有发现PAI平台能在IDE上敲建模命令这个隐藏功能，所以只能大幅压缩模型。
 最终版本的线上模型用了1个4层1000棵树的PS-SMART做清洗，而后训练集以三种不同比例抽取最优秀的样本作为清洗后训练集，再训练1个5层1000棵树的PS-SMART+2个6层1000棵树的GBDT。
